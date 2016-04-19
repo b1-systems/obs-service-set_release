@@ -43,4 +43,4 @@ The following parameters may be given in the _service file:
 *release* - The release pattern to be used. Either CI_CNT or B_CNT must be part of
 the Release pattern. This parameter is mandatory.
 
-*file* - The spec file to be modified. May be given more then once. This parameter is optional. If
+*file* - The spec file to be modified. May be given more then once. This parameter is optional. If this parameter is omitted all spec files will be updated.

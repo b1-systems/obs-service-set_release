@@ -1,6 +1,46 @@
+= Open Build Service - set_release Source Service
 
 == Set Release Source Service
 
 This service updates a RPM spec Release tag. The pattern to be used for the
 Release tag is specified in the _service file.
 
+=== Release Tag
+
+The default Release tag uses two magic strings:
+
+. CI_CNT <- number of commits
+
+. B_CNT <- number of rebuilds (when the rebuild is triggerd)
+
+The default setting is
+
+----
+Release: <CI_CNT>.<B_CNT>
+----
+
+The custom release string and the magic strings must be delimited by a ".".
+
+Either CI_CNT or B_CNT must be part of the Release tag!
+
+=== _service File
+
+The Set Release Service will read the release pattern to be used from the _service file, eg:
+
+----
+<services>
+  <service name="set_release">
+    <param name="release">myrelease.CI_CNT.B_CNT</param>
+  </service>
+</services>
+----
+
+The magic strings must not be enclosed in angle brackets when specified in the
+_service file!
+
+The following parameters may be given in the _service file:
+
+*release* - The release pattern to be used. Either CI_CNT or B_CNT must be part of
+the Release pattern. This parameter is mandatory.
+
+*file* - The spec file to be modified. May be given more then once. This parameter is optional. If

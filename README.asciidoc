@@ -1,1 +1,6 @@
 
+== Set Release Source Service
+
+This service updates a RPM spec Release tag. The pattern to be used for the
+Release tag is specified in the _service file.
+

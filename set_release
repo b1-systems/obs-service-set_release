@@ -1,0 +1,126 @@
+#!/usr/bin/perl
+                                                                                                                                                                          
+# copyright:   B1 Systems GmbH <info@b1-systems.de>, 2016
+# license:     GPLv3+, http://www.gnu.org/licenses/gpl-3.0.html
+# author:      Timo Benk <benk@b1-systems.de>
+# description: a source service to update the release tag in spec files
+
+use strict;
+use warnings;
+
+use File::Basename;
+use Getopt::Long;
+use File::Copy qw(copy);
+
+##
+# global config and default values
+my $CONFIG = {
+
+  'file' => [ glob('*.spec') ],
+  'magic' => [
+
+    'CI_CNT',
+    'B_CNT',
+  ],
+};
+
+###
+# dump a short usage info to stdout.
+sub usage {
+
+    print "usage: " . basename($0) . " --release PATTERN --outdir OUTDIR ...\n";
+    print "--release PATTERN  release release (must include  one of: " . join(", ", @{$CONFIG->{'magic'}}) . ")\n";
+    print "--file FILE        modify only this file (may be given multiple times)\n";
+    print "--outdir OUTDIR    output directory for modified sources\n";
+
+    exit 1;
+}
+
+###
+# parse the commandline.
+sub parse_commandline {
+
+  my $arg_release = $CONFIG->{release};
+  my $arg_outdir  = $CONFIG->{outdir};
+  my $arg_file    = $CONFIG->{file};
+
+  my $ret = GetOptions (
+    "release=s" => \$arg_release,
+    "file=s@"   => \$arg_file,
+    "outdir=s"  => \$arg_outdir,
+  );
+
+  usage() if (not $ret);
+
+  if (not defined($arg_release)) {
+
+    print "error: parameter --release is mandatory.\n";
+    usage();
+  }
+
+  if (not defined($arg_outdir)) {
+
+    print "error: parameter --outdir is mandatory.\n";
+    usage();
+  }
+
+  my $found = 0;
+  foreach my $str (@{$CONFIG->{'magic'}}) {
+
+    $found = 1 if ($arg_release =~ s/$str/<$str>/g);
+  }
+
+  if (not $found) {
+
+    print "error: release must include one of: " . join(", ", @{$CONFIG->{'magic'}}) . "\n";
+    usage();
+  }
+
+  my $options = {};
+
+  $options->{release} = $arg_release;
+  $options->{outdir}  = $arg_outdir;
+  $options->{file}    = $arg_file;
+
+  return $options;
+}
+
+##
+# replace all occurences of "^$_tag: .*" with "$_tag: $_value" in
+# $_file.
+sub replace_tag {
+
+  my $_file  = shift;
+  my $_tag   = shift;
+  my $_value = shift;
+
+  open(FILE, $_file) or die "couldn't open file: $!"; 
+  my @contents = <FILE>;
+  close(FILE);
+
+  foreach my $line (@contents) {
+
+    $line = "$_tag: $_value\n" if ($line =~ /^$_tag:\s*/);
+  }
+
+  open(FILE, ">$_file") or die "couldn't open file: $!"; 
+  print(FILE @contents);
+  close(FILE);
+}
+
+##
+# main
+sub main() {
+
+  my $options = parse_commandline();
+
+  foreach my $file (@{$options->{'file'}}) {
+
+    my $copy = $options->{'outdir'} . '/' . $file;
+    copy($file, $copy) or die("copy '$file' -> '$copy' failed: $!");
+
+    replace_tag($copy, 'Release', $options->{'release'});
+  }
+}
+
+main();

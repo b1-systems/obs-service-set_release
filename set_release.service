@@ -1,0 +1,11 @@
+<service name="set_release">
+  <summary>Set Release tag in spec files.</summary>
+  <description>This service updates the release tag in the spec file according to given value.</description>
+  <parameter name="release" required="true">
+    <description>Set release to this pattern. The pattern must include either "CI_CNT" or "B_CNT".</description>
+  </parameter>
+  <parameter name="file" allowmultiple="true">
+    <description>Update only the given file. May be given multiple times.</description>
+  </parameter>
+</service>
+

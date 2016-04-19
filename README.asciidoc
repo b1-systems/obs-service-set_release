@@ -1,4 +1,4 @@
-= Open Build Service - set_release Source Service
+= Open Build Service - Set Release Source Service
 
 == Set Release Source Service
 
